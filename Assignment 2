@@ -1,0 +1,147 @@
+import numpy as np
+import pandas as pd
+df=pd.read_csv("/content/drive/MyDrive/Colab Notebooks/Churn_Modelling.csv")
+
+
+df
+
+df.shape
+
+df.columns
+df["NumOfProducts"].unique()
+df["NumOfProducts"].value_counts()
+
+df.dtypes
+
+df.describe()
+
+df_1=df.copy()
+df_1.head()
+
+df.drop(['RowNumber','CustomerId','Surname'],axis=1,inplace=True)
+
+df.head()
+
+df.Geography.value_counts()
+
+geography=pd.get_dummies(df["Geography"],drop_first="False")
+gender=pd.get_dummies(df["Gender"],drop_first="False")
+
+
+geography
+
+gender
+
+df=pd.concat([df,geography,gender],axis=1)
+
+df.columns
+
+df.drop(['Geography','Gender',],axis=1,inplace=True)
+
+df.head()
+
+df.drop('Exited',axis=1)
+
+x=df.drop("Exited", axis=1)
+y=df['Exited']
+
+x.head()
+
+y.head()
+
+from sklearn.model_selection import train_test_split
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2, random_state=0)
+
+print('X Train Shape:{},Y Train Shape {}'.format(x_train.shape,y_train.shape))
+
+print('X Test Shape:{},Y Test Shape {}'.format(x_test.shape,y_test.shape))
+
+x_train
+
+df["Balance"].plot()
+
+df["Balance"].nunique()
+
+df["Balance"].max()
+
+from sklearn.preprocessing import StandardScaler
+
+sc=StandardScaler()
+
+x_train=sc.fit_transform(x_train)
+
+x_train
+
+x_test=sc.transform(x_test)
+
+import keras
+
+from keras.models import Sequential
+
+from keras.layers import Dense
+
+classifier=Sequential()
+
+classifier.add(Dense(units=6, activation="relu", input_dim=11))
+
+classifier.add(Dense(units=6, activation="relu"))
+
+classifier.add(Dense(units=1, activation="sigmoid"))
+
+import tensorflow as tf
+
+classifier.compile(optimizer='adam',loss = "binary_crossentropy",
+              metrics=['accuracy'])
+
+model_history=classifier.fit(x_train, y_train,batch_size=10,validation_split=0.33,epochs=25)
+
+model_history.history.keys()
+
+
+
+import matplotlib.pyplot as plt
+
+plt.plot(model_history.history["accuracy"])
+plt.plot(model_history.history["val_accuracy"])
+
+
+plt.plot(model_history.history["loss"])
+plt.plot(model_history.history["val_loss"])
+
+
+y_pred=classifier.predict(x_test)
+
+y_pred
+
+y_pred=(y_pred>0.5)
+
+y_pred
+
+from sklearn.metrics import confusion_matrix
+
+cm=confusion_matrix(y_test,y_pred)
+
+cm
+
+from sklearn.metrics import accuracy_score
+
+score=accuracy_score(y_pred,y_test)
+
+score
+
+def predict_exit(sample_values):
+  sample_value=np.array(sample_values)
+  sample_values=sample_values.reshape(1,-1)
+  sample_values=sc.transform(sample_values)
+  return classifier.predict(sample_values)
+
+sample_values=[660,10,5,0.00,2,1,0,163830.64,0,0,1]
+
+sample_value=np.array(sample_values)
+
+sample_values=sample_value.reshape(1,-1)
+
+ sample_values=sc.transform(sample_values)
+
+classifier.predict(sample_values)
